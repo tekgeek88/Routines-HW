@@ -42,30 +42,80 @@
 
 
 
-            LEA     R0 MSG
-            PUTS
-
-            LEA     R0 NEWLINE
-            PUTS
-
-
-
 ; Read a message from the console character by character
-            LEA     R0, MSG
-            PUTS
-            LD      R1, INPUT_MESSAGE ; Let R1 be the starting address for the string to be stored
+          
+	LEA R1, HELLO
 
-PROMPT      GETC
-            STR     R0, R1, #0
-            ADD     R1, R1, #1
-            ADD     R0, R0, xFFF6   ; R0 <- R0 - New Line Char
-END         BRnzp   PROMPT
+AGAIN	LDR R2, R1, #0
+	BRz NEXT
+	ADD R1, R1, #1
+	BR AGAIN
 
-; Display the string back to the console
-            LD      R0, INPUT_MESSAGE
-            PUTS
+NEXT	LEA R0, MSG
+	PUTS
+	LD R3, NEGENTER
+
+AGAIN2	GETC
+	OUT
+	ADD R2, R0, R3	
+	BRz CONT
+	STR R0, R1, #0
+	ADD R1, R1, #1
+	BR AGAIN2
+
+CONT	AND R2, R2, #0
+	STR R2, R1, #0
 
 
+
+;Encryption Algorithm
+ENCRYPT	AND R1, R1, #0
+	AND R2, R2, #0
+	AND R3, R3, #0
+	AND R5, R5, #0
+	AND R4, R4, #0 
+	AND R6, R6, #0
+
+	LEA R2, HELLO ; gets address of value
+
+	BRnzp ENCRYPTLOOP
+
+
+ENCRYPTLOOP	
+
+	
+
+	LDR R3, R2, #0; interpret value at address, based on offset
+
+	ADD R3, R3, #0 ; changes asci value by 0
+	
+	STR R3, R2, #0; stores value to location in memory
+	
+	LDR R0, R3, #0
+	OUT
+	LEA R0, NEWLINE
+	PUTS
+
+
+	ADD R4, R4, #1
+	ADD R2, R2, #1
+	
+	;Determine if new line
+	LD R5, NEGNEWLINE
+	ADD R5, R5, R3
+
+	BRnp ENCRYPTLOOP
+
+	
+	
+
+	
+ENCRYPTDONE
+	LEA R0, HELLO
+	PUTS
+	LEA R0, NEWLINE
+	PUTS
+	
 
 
             halt
@@ -76,9 +126,15 @@ TYPE            .STRINGZ "(E)ncrypt / (D)ecrypt: "
 KEY             .STRINGZ "Enter encrpytion key(1-9): "
 MSG             .STRINGZ "Enter message (20 char limit): "
 NEWLINE         .STRINGZ "\n"
+HELLO 		.STRINGZ ""
+		.BLKW #10
+NEGNEWLINE 	.FILL #-10
 KEYLOC          .FILL x3101
+ASCI		.FILL X30
 NEGASCI         .FILL #-48
 INPUT_MESSAGE   .FILL x3102
+NEGENTER 	.FILL xFFF6
+
 
 
             .end
